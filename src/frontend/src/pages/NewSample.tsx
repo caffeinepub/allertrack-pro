@@ -94,26 +94,36 @@ export default function NewSample() {
       return;
     }
     setIsSubmitting(true);
+    let sampleId: bigint | undefined;
     try {
-      const sampleId = await createSample.mutateAsync(form);
-      const tests = getSelectedTestDefs();
-      await Promise.all(
-        tests.map((t) =>
-          addTest.mutateAsync({
-            sampleId,
-            testCode: t.code,
-            testName: t.name,
-            department: t.department,
-            requiredSampleType: t.requiredSampleType,
-            turnaroundDays: BigInt(t.isAllergyProfile ? 21 : t.turnaroundDays),
-            isAllergyProfile: t.isAllergyProfile ?? false,
-          }),
-        ),
+      sampleId = await createSample.mutateAsync(form);
+    } catch {
+      toast.error(
+        "Failed to create sample record. Please check your connection and try again.",
       );
+      setIsSubmitting(false);
+      return;
+    }
+    try {
+      const testDefs = getSelectedTestDefs();
+      for (const t of testDefs) {
+        await addTest.mutateAsync({
+          sampleId,
+          testCode: t.code,
+          testName: t.name,
+          department: t.department,
+          requiredSampleType: t.requiredSampleType,
+          turnaroundDays: BigInt(t.isAllergyProfile ? 21 : t.turnaroundDays),
+          isAllergyProfile: t.isAllergyProfile ?? false,
+        });
+      }
       toast.success("Sample created successfully!");
       navigate({ to: "/samples/$id", params: { id: sampleId.toString() } });
     } catch {
-      toast.error("Failed to create sample. Please try again.");
+      toast.error(
+        "Sample was created but some tests could not be added. Please edit the sample to add missing tests.",
+      );
+      navigate({ to: "/samples/$id", params: { id: sampleId.toString() } });
     } finally {
       setIsSubmitting(false);
     }

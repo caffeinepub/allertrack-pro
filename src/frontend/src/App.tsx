@@ -6,9 +6,12 @@ import {
   createRoute,
   createRouter,
 } from "@tanstack/react-router";
+import { LoginWelcomePopup } from "./components/LoginWelcomePopup";
 import { Sidebar } from "./components/Sidebar";
 import { WelcomePopup } from "./components/WelcomePopup";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import Dashboard from "./pages/Dashboard";
+import LoginPage from "./pages/LoginPage";
 import NewSample from "./pages/NewSample";
 import Referrals from "./pages/Referrals";
 import SampleDetail from "./pages/SampleDetail";
@@ -16,6 +19,12 @@ import Samples from "./pages/Samples";
 import Settings from "./pages/Settings";
 
 function AppLayout() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
   return (
     <div className="flex min-h-screen bg-background molecular-bg">
       <Sidebar />
@@ -33,6 +42,7 @@ function AppLayout() {
         </footer>
       </main>
       <WelcomePopup />
+      <LoginWelcomePopup />
     </div>
   );
 }
@@ -94,9 +104,9 @@ declare module "@tanstack/react-router" {
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <RouterProvider router={router} />
       <Toaster position="top-right" richColors />
-    </>
+    </AuthProvider>
   );
 }

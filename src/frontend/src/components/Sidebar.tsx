@@ -5,9 +5,13 @@ import {
   FlaskConical,
   HelpCircle,
   LayoutDashboard,
+  LogOut,
   PlusCircle,
   Settings,
+  User,
 } from "lucide-react";
+import type React from "react";
+import { useAuth } from "../context/AuthContext";
 import { useSamples } from "../hooks/useQueries";
 
 interface NavItem {
@@ -26,13 +30,12 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
-import type React from "react";
-
 export function Sidebar() {
   const routerState = useRouterState();
   const currentPath = routerState.location.pathname;
   const { data: samples } = useSamples();
   const sampleCount = samples?.length ?? 0;
+  const { user, logout } = useAuth();
 
   return (
     <aside
@@ -114,6 +117,41 @@ export function Sidebar() {
           Contact lab support for assistance
         </p>
       </div>
+
+      {/* Welcome + Logout */}
+      {user && (
+        <div
+          className="mx-3 mb-3 px-3 py-3 rounded-lg border border-sidebar-primary/30"
+          style={{ background: "oklch(0.64 0.12 180 / 0.12)" }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <User size={14} className="text-sidebar-primary" />
+            <span className="text-sm font-semibold text-sidebar-foreground">
+              Welcome, {user}
+            </span>
+          </div>
+          <button
+            type="button"
+            data-ocid="sidebar.logout.button"
+            onClick={logout}
+            className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-150"
+            style={{
+              color: "oklch(0.65 0.2 30)",
+              background: "oklch(0.65 0.2 30 / 0.08)",
+              border: "1px solid oklch(0.65 0.2 30 / 0.2)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "oklch(0.65 0.2 30 / 0.15)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "oklch(0.65 0.2 30 / 0.08)";
+            }}
+          >
+            <LogOut size={12} />
+            Logout
+          </button>
+        </div>
+      )}
 
       {/* Branding footer */}
       <div className="px-5 py-4 border-t border-sidebar-border">
