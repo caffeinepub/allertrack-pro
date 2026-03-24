@@ -8,6 +8,7 @@ import {
 import { FlaskConical, Quote } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 const QUOTES = [
   {
@@ -37,15 +38,18 @@ const QUOTES = [
 ];
 
 export function WelcomePopup() {
+  const { justLoggedIn } = useAuth();
   const [open, setOpen] = useState(false);
   const [quoteIdx, setQuoteIdx] = useState(0);
 
   useEffect(() => {
+    // Don't show while the login welcome popup is active — they'd conflict.
+    if (justLoggedIn) return;
     const welcomed = localStorage.getItem("allertrack_welcomed");
     if (!welcomed) {
       setOpen(true);
     }
-  }, []);
+  }, [justLoggedIn]);
 
   const handleGetStarted = () => {
     localStorage.setItem("allertrack_welcomed", "true");
