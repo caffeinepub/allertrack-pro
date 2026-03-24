@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+
+    /* Main backgrounds */
+    --background: 0.95 0.018 220;
+    --foreground: 0.22 0.02 230;
+
+    /* Cards */
+    --card: 1 0 0;
+    --card-foreground: 0.22 0.02 230;
+
+    --popover: 1 0 0;
+    --popover-foreground: 0.22 0.02 230;
+
+    /* Primary = teal accent */
+    --primary: 0.64 0.12 180;
+    --primary-foreground: 1 0 0;
+
+    /* Secondary = blue-teal */
+    --secondary: 0.56 0.1 220;
+    --secondary-foreground: 1 0 0;
+
+    --muted: 0.92 0.015 220;
+    --muted-foreground: 0.55 0.03 220;
+
+    --accent: 0.64 0.12 180;
+    --accent-foreground: 1 0 0;
+
+    --destructive: 0.65 0.2 30;
+    --destructive-foreground: 1 0 0;
+
+    --border: 0.9 0.018 220;
+    --input: 0.88 0.02 220;
+    --ring: 0.64 0.12 180;
+
+    /* Status colors */
+    --success: 0.72 0.16 155;
+    --warning: 0.75 0.16 65;
+    --danger: 0.65 0.2 30;
+    --info: 0.56 0.1 220;
+
+    /* Charts */
+    --chart-1: 0.64 0.12 180;
+    --chart-2: 0.56 0.1 220;
+    --chart-3: 0.72 0.16 155;
+    --chart-4: 0.75 0.16 65;
+    --chart-5: 0.65 0.2 30;
+
+    /* Sidebar (dark) */
+    --sidebar: 0.18 0.025 230;
+    --sidebar-foreground: 0.92 0.015 220;
+    --sidebar-primary: 0.64 0.12 180;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.25 0.03 230;
+    --sidebar-accent-foreground: 0.92 0.015 220;
+    --sidebar-border: 0.28 0.03 230;
+    --sidebar-ring: 0.64 0.12 180;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+/* Molecular background decoration */
+.molecular-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.molecular-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Ccircle cx='100' cy='100' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='300' cy='100' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='500' cy='100' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='250' r='6' fill='none' stroke='%232F7FA6' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='400' cy='250' r='6' fill='none' stroke='%232F7FA6' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='100' cy='400' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='300' cy='400' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='500' cy='400' r='6' fill='none' stroke='%232FA7A0' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='200' cy='550' r='6' fill='none' stroke='%232F7FA6' stroke-width='1.5' opacity='0.12'/%3E%3Ccircle cx='400' cy='550' r='6' fill='none' stroke='%232F7FA6' stroke-width='1.5' opacity='0.12'/%3E%3Cline x1='100' y1='100' x2='300' y2='100' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='300' y1='100' x2='500' y2='100' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='100' y1='100' x2='200' y2='250' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='300' y1='100' x2='200' y2='250' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='300' y1='100' x2='400' y2='250' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='500' y1='100' x2='400' y2='250' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='200' y1='250' x2='100' y2='400' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='200' y1='250' x2='300' y2='400' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='400' y1='250' x2='300' y2='400' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='400' y1='250' x2='500' y2='400' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='100' y1='400' x2='200' y2='550' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='300' y1='400' x2='200' y2='550' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='300' y1='400' x2='400' y2='550' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3Cline x1='500' y1='400' x2='400' y2='550' stroke='%232FA7A0' stroke-width='1' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 600px 600px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.molecular-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(var(--border));
+  border-radius: 3px;
+}
