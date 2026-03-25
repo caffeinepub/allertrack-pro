@@ -42,15 +42,21 @@ export default function NewSample() {
   const [form, setForm] = useState({
     patientName: "",
     sampleSource: "",
-    sampleType: "",
     handler: "",
     notes: "",
   });
+  const [selectedSampleTypes, setSelectedSampleTypes] = useState<string[]>([]);
   const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set());
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(
     new Set(DEPARTMENTS),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const toggleSampleType = (type: string) => {
+    setSelectedSampleTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
 
   const toggleTest = (code: string) => {
     setSelectedTests((prev) => {
@@ -85,8 +91,12 @@ export default function NewSample() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.patientName.trim() || !form.sampleType || !form.handler) {
-      toast.error("Please fill in Patient Name, Sample Type, and Handler");
+    if (!form.patientName.trim() || !form.handler) {
+      toast.error("Please fill in Patient Name and Handler");
+      return;
+    }
+    if (selectedSampleTypes.length === 0) {
+      toast.error("Please select at least one sample type");
       return;
     }
     if (selectedTests.size === 0) {
@@ -96,7 +106,10 @@ export default function NewSample() {
     setIsSubmitting(true);
     let sampleId: bigint | undefined;
     try {
-      sampleId = await createSample.mutateAsync(form);
+      sampleId = await createSample.mutateAsync({
+        ...form,
+        sampleType: selectedSampleTypes.join(", "),
+      });
     } catch {
       toast.error(
         "Failed to create sample record. Please check your connection and try again.",
@@ -219,30 +232,45 @@ export default function NewSample() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="sampleType">
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label>
                     Sample Type <span className="text-destructive">*</span>
                   </Label>
-                  <Select
-                    value={form.sampleType}
-                    onValueChange={(v) =>
-                      setForm((p) => ({ ...p, sampleType: v }))
-                    }
+                  <div
+                    data-ocid="new_sample.sample_type.select"
+                    className="flex flex-wrap gap-2"
                   >
-                    <SelectTrigger
-                      id="sampleType"
-                      data-ocid="new_sample.sample_type.select"
-                    >
-                      <SelectValue placeholder="Select sample type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SAMPLE_TYPES.map((s) => (
-                        <SelectItem key={s} value={s}>
-                          {s}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    {SAMPLE_TYPES.map((type) => {
+                      const isSelected = selectedSampleTypes.includes(type);
+                      const checkId = `st-${type.toLowerCase().replace(/[^a-z]/g, "-")}`;
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => toggleSampleType(type)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                            isSelected
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                          }`}
+                        >
+                          <Checkbox
+                            id={checkId}
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSampleType(type)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-3.5 w-3.5"
+                          />
+                          {type}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedSampleTypes.length > 0 && (
+                    <p className="text-xs text-primary mt-1">
+                      Selected: {selectedSampleTypes.join(", ")}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1.5 md:col-span-2">
                   <Label htmlFor="notes">Notes</Label>

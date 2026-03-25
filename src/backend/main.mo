@@ -1,13 +1,9 @@
 import Time "mo:core/Time";
 import Text "mo:core/Text";
 import Map "mo:core/Map";
-import List "mo:core/List";
 import Runtime "mo:core/Runtime";
 import Nat "mo:core/Nat";
-import Int "mo:core/Int";
 import Order "mo:core/Order";
-import Iter "mo:core/Iter";
-import Array "mo:core/Array";
 import Principal "mo:core/Principal";
 
 import AccessControl "authorization/access-control";
@@ -83,32 +79,7 @@ actor {
   let tests = Map.empty<Nat, LaboratorySampleTest>();
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
-    };
-    userProfiles.get(caller);
-  };
-
-  public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
-    userProfiles.get(user);
-  };
-
-  public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
-    userProfiles.add(caller, profile);
-  };
-
-  public shared ({ caller }) func createSample(patientName : Text, sampleSource : Text, sampleType : Text, handler : Text, notes : Text) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create samples");
-    };
-
+  public shared func createSample(patientName : Text, sampleSource : Text, sampleType : Text, handler : Text, notes : Text) : async Nat {
     let sampleId = nextSampleId;
     nextSampleId += 1;
 
@@ -130,11 +101,7 @@ actor {
     sampleId;
   };
 
-  public shared ({ caller }) func addTestToSample(sampleId : Nat, testCode : Text, testName : Text, department : Text, requiredSampleType : Text, turnaroundDays : Nat, isAllergyProfile : Bool) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can add tests");
-    };
-
+  public shared func addTestToSample(sampleId : Nat, testCode : Text, testName : Text, department : Text, requiredSampleType : Text, turnaroundDays : Nat, isAllergyProfile : Bool) : async Nat {
     if (not samples.containsKey(sampleId)) {
       Runtime.trap("Sample not found, cannot add test");
     };
@@ -162,11 +129,7 @@ actor {
     testId;
   };
 
-  public shared ({ caller }) func updateSampleStatus(sampleId : Nat, status : SampleStatus) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update sample status");
-    };
-
+  public shared func updateSampleStatus(sampleId : Nat, status : SampleStatus) : async () {
     switch (samples.get(sampleId)) {
       case (null) { Runtime.trap("Sample not found") };
       case (?sample) {
@@ -178,11 +141,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func updateSample(sampleId : Nat, patientName : Text, sampleSource : Text, sampleType : Text, handler : Text, notes : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update samples");
-    };
-
+  public shared func updateSample(sampleId : Nat, patientName : Text, sampleSource : Text, sampleType : Text, handler : Text, notes : Text) : async () {
     switch (samples.get(sampleId)) {
       case (null) { Runtime.trap("Sample not found") };
       case (?sample) {
@@ -199,11 +158,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func updateSampleReferral(sampleId : Nat, referredTo : ?Text, referralReturned : Bool) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update sample referral");
-    };
-
+  public shared func updateSampleReferral(sampleId : Nat, referredTo : ?Text, referralReturned : Bool) : async () {
     switch (samples.get(sampleId)) {
       case (null) { Runtime.trap("Sample not found") };
       case (?sample) {
@@ -217,11 +172,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func updateTestStatus(testId : Nat, status : TestStatus, resultNotes : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update test status");
-    };
-
+  public shared func updateTestStatus(testId : Nat, status : TestStatus, resultNotes : Text) : async () {
     switch (tests.get(testId)) {
       case (null) { Runtime.trap("Test not found") };
       case (?test) {
@@ -235,45 +186,30 @@ actor {
     };
   };
 
-  public query ({ caller }) func getSamples() : async [LaboratorySample] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view samples");
-    };
+  public query func getSamples() : async [LaboratorySample] {
     samples.values().toArray().sort();
   };
 
-  public query ({ caller }) func getSampleById(sampleId : Nat) : async LaboratorySample {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view samples");
-    };
+  public query func getSampleById(sampleId : Nat) : async LaboratorySample {
     switch (samples.get(sampleId)) {
       case (null) { Runtime.trap("Sample not found") };
       case (?sample) { sample };
     };
   };
 
-  public query ({ caller }) func getSampleTests(sampleId : Nat) : async [LaboratorySampleTest] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view tests");
-    };
+  public query func getSampleTests(sampleId : Nat) : async [LaboratorySampleTest] {
     tests.values().toArray().filter(func(test) { test.sampleId == sampleId }).sort();
   };
 
-  public query ({ caller }) func searchSamples(patientName : Text) : async [LaboratorySample] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can search samples");
-    };
+  public query func searchSamples(patientName : Text) : async [LaboratorySample] {
     samples.values().toArray().filter(func(sample) { sample.patientName.contains(#text patientName) }).sort();
   };
 
-  public query ({ caller }) func getSamplesByStatus(status : SampleStatus) : async [LaboratorySample] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view samples");
-    };
+  public query func getSamplesByStatus(status : SampleStatus) : async [LaboratorySample] {
     samples.values().toArray().filter(func(sample) { sample.status == status }).sort();
   };
 
-  public query ({ caller }) func getDashboardStats() : async {
+  public query func getDashboardStats() : async {
     total : Nat;
     pending : Nat;
     inProgress : Nat;
@@ -281,10 +217,6 @@ actor {
     referred : Nat;
     resultsReceived : Nat;
   } {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view dashboard stats");
-    };
-
     let allSamples = samples.values().toArray();
     let total = allSamples.size();
     var pending = 0;
@@ -313,11 +245,7 @@ actor {
     };
   };
 
-  public shared ({ caller }) func deleteSample(sampleId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete samples");
-    };
-
+  public shared func deleteSample(sampleId : Nat) : async () {
     if (not samples.containsKey(sampleId)) {
       Runtime.trap("Sample not found, cannot delete...");
     };

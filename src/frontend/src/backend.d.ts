@@ -1,4 +1,3 @@
-import type { Principal } from "@icp-sdk/core/principal";
 export interface Some<T> {
     __kind__: "Some";
     value: T;
@@ -48,18 +47,10 @@ export enum TestStatus {
     completed = "completed",
     inProgress = "inProgress"
 }
-export enum UserRole {
-    admin = "admin",
-    user = "user",
-    guest = "guest"
-}
 export interface backendInterface {
     addTestToSample(sampleId: bigint, testCode: string, testName: string, department: string, requiredSampleType: string, turnaroundDays: bigint, isAllergyProfile: boolean): Promise<bigint>;
-    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createSample(patientName: string, sampleSource: string, sampleType: string, handler: string, notes: string): Promise<bigint>;
     deleteSample(sampleId: bigint): Promise<void>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
-    getCallerUserRole(): Promise<UserRole>;
     getDashboardStats(): Promise<{
         total: bigint;
         referred: bigint;
@@ -72,9 +63,6 @@ export interface backendInterface {
     getSampleTests(sampleId: bigint): Promise<Array<LaboratorySampleTest>>;
     getSamples(): Promise<Array<LaboratorySample>>;
     getSamplesByStatus(status: SampleStatus): Promise<Array<LaboratorySample>>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
-    isCallerAdmin(): Promise<boolean>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     searchSamples(patientName: string): Promise<Array<LaboratorySample>>;
     updateSample(sampleId: bigint, patientName: string, sampleSource: string, sampleType: string, handler: string, notes: string): Promise<void>;
     updateSampleReferral(sampleId: bigint, referredTo: string | null, referralReturned: boolean): Promise<void>;

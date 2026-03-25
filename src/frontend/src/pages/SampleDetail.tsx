@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -71,33 +72,48 @@ export default function SampleDetail() {
   const [editForm, setEditForm] = useState({
     patientName: "",
     sampleSource: "",
-    sampleType: "",
     handler: "",
     notes: "",
   });
+  const [editSampleTypes, setEditSampleTypes] = useState<string[]>([]);
 
   const startEditing = () => {
     if (!sample) return;
     setEditForm({
       patientName: sample.patientName,
       sampleSource: sample.sampleSource || "",
-      sampleType: sample.sampleType,
       handler: sample.handler,
       notes: sample.notes || "",
     });
+    // Parse existing comma-separated types
+    const types = sample.sampleType
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    setEditSampleTypes(types);
     setIsEditing(true);
   };
 
   const cancelEditing = () => setIsEditing(false);
 
+  const toggleEditSampleType = (type: string) => {
+    setEditSampleTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
+    );
+  };
+
   const handleSaveEdit = async () => {
     if (!sampleId) return;
+    if (editSampleTypes.length === 0) {
+      toast.error("Please select at least one sample type");
+      return;
+    }
     try {
       await updateSample.mutateAsync({
         sampleId,
         patientName: editForm.patientName,
         sampleSource: editForm.sampleSource,
-        sampleType: editForm.sampleType,
+        sampleType: editSampleTypes.join(", "),
         handler: editForm.handler,
         notes: editForm.notes,
       });
@@ -284,28 +300,47 @@ export default function SampleDetail() {
                         className="text-sm"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs">Sample Type</Label>
-                      <Select
-                        value={editForm.sampleType}
-                        onValueChange={(v) =>
-                          setEditForm((p) => ({ ...p, sampleType: v }))
-                        }
+                    <div className="space-y-1.5 md:col-span-2">
+                      <Label className="text-xs">
+                        Sample Type <span className="text-destructive">*</span>
+                      </Label>
+                      <div
+                        data-ocid="sample_detail.sample_type.select"
+                        className="flex flex-wrap gap-2"
                       >
-                        <SelectTrigger
-                          data-ocid="sample_detail.sample_type.select"
-                          className="text-sm"
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SAMPLE_TYPES.map((s) => (
-                            <SelectItem key={s} value={s}>
-                              {s}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        {SAMPLE_TYPES.map((type) => {
+                          const isSelected = editSampleTypes.includes(type);
+                          const checkId = `edit-st-${type.toLowerCase().replace(/[^a-z]/g, "-")}`;
+                          return (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => toggleEditSampleType(type)}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                                isSelected
+                                  ? "border-primary bg-primary/10 text-primary"
+                                  : "border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                              }`}
+                            >
+                              <Checkbox
+                                id={checkId}
+                                checked={isSelected}
+                                onCheckedChange={() =>
+                                  toggleEditSampleType(type)
+                                }
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-3.5 w-3.5"
+                              />
+                              {type}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {editSampleTypes.length > 0 && (
+                        <p className="text-xs text-primary mt-1">
+                          Selected: {editSampleTypes.join(", ")}
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs">Handler / Authorized By</Label>
